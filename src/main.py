@@ -1,24 +1,16 @@
 import asyncio
+
 import uvicorn
 
-from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
+from app import create_app
 
-app = FastAPI(root_path="/api/v1")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = create_app()
 
 
 async def run() -> None:
     config = uvicorn.Config(
         "main:app",
-        host="0.0.0.0",
+        host="127.0.0.1",
         port=8000,
         reload=False,
     )
@@ -31,8 +23,3 @@ async def run() -> None:
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run())
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
