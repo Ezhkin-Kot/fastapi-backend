@@ -32,6 +32,6 @@ class PostResponse(PostBase):
     author_id: uuid.UUID
     category_id: Optional[uuid.UUID]
     location_id: Optional[uuid.UUID]
-    image: Optional[str]
+    image: Optional[str] = None
     created_at: datetime
     comment_count: Optional[int] = None
