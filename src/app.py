@@ -16,7 +16,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(users_router, prefix="/users", tags=["Users"])
-    app.include_router(posts_router, prefix="/posts", tags=["Posts"])
+    app.include_router(users_router, prefix="/users", tags=["User APIs"])
+    app.include_router(posts_router, prefix="/posts", tags=["Post APIs"])
 
     return app
