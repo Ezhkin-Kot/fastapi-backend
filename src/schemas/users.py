@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
@@ -17,10 +16,10 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = Field(default=None, max_length=255)
-    last_name: Optional[str] = Field(default=None, max_length=255)
-    username: Optional[str] = Field(default=None, max_length=255)
-    email: Optional[EmailStr] = None
+    first_name: str | None = Field(default=None, max_length=255)
+    last_name: str | None = Field(default=None, max_length=255)
+    username: str | None = Field(default=None, max_length=255)
+    email: EmailStr | None = None
 
 
 class UserUpdatePassword(BaseModel):
@@ -32,4 +31,4 @@ class UserResponse(UserBase):
     id: uuid.UUID
     is_active: bool = True
     is_superuser: bool = False
-    created_at: Optional[datetime] = None
+    created_at: datetime | None = None

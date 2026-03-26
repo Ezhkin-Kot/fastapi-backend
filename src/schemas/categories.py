@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -17,10 +16,10 @@ class CategoryCreate(CategoryBase):
 
 
 class CategoryUpdate(BaseModel):
-    title: Optional[str] = Field(default=None, max_length=255)
-    description: Optional[str] = None
-    slug: Optional[str] = None
-    is_published: Optional[bool] = None
+    title: str | None = Field(default=None, max_length=255)
+    description: str | None = None
+    slug: str | None = None
+    is_published: bool | None = None
 
 
 class CategoryResponse(CategoryBase):

@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -14,24 +13,24 @@ class PostBase(BaseModel):
 
 class PostCreate(PostBase):
     author_id: uuid.UUID
-    category_id: Optional[uuid.UUID] = None
-    location_id: Optional[uuid.UUID] = None
+    category_id: uuid.UUID | None = None
+    location_id: uuid.UUID | None = None
 
 
 class PostUpdate(BaseModel):
-    title: Optional[str] = Field(default=None, max_length=255)
-    text: Optional[str] = None
-    pub_date: Optional[datetime] = None
-    is_published: Optional[bool] = None
-    category_id: Optional[uuid.UUID] = None
-    location_id: Optional[uuid.UUID] = None
+    title: str | None = Field(default=None, max_length=255)
+    text: str | None = None
+    pub_date: datetime | None = None
+    is_published: bool | None = None
+    category_id: uuid.UUID | None = None
+    location_id: uuid.UUID | None = None
 
 
 class PostResponse(PostBase):
     id: uuid.UUID
     author_id: uuid.UUID
-    category_id: Optional[uuid.UUID]
-    location_id: Optional[uuid.UUID]
-    image: Optional[str] = None
+    category_id: uuid.UUID | None
+    location_id: uuid.UUID | None
+    image: str | None = None
     created_at: datetime
-    comment_count: Optional[int] = None
+    comment_count: int | None = None

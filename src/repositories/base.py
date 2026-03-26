@@ -1,4 +1,4 @@
-from typing import Any, Generic, Optional, Sequence, Type, TypeVar
+from typing import Any, Generic, Sequence, Type, TypeVar
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,7 @@ class BaseRepository(Generic[T]):
         self.model = model
         self.session = session
 
-    async def get(self, obj_id: Any) -> Optional[T]:
+    async def get(self, obj_id: Any) -> T | None:
         return await self.session.get(self.model, obj_id)
 
     async def get_all(self) -> Sequence[T]:

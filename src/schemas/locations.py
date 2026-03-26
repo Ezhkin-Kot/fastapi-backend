@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -15,8 +14,8 @@ class LocationCreate(LocationBase):
 
 
 class LocationUpdate(BaseModel):
-    name: Optional[str] = Field(default=None, max_length=255)
-    is_published: Optional[bool] = None
+    name: str | None = Field(default=None, max_length=255)
+    is_published: bool | None = None
 
 
 class Location(LocationBase):
