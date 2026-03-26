@@ -1,8 +1,8 @@
-from typing import Sequence
-
-from sqlalchemy import or_, select
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.exceptions import UserAlreadyExistsError
 from src.models.users import User
 from src.repositories.base import BaseRepository
 
@@ -16,12 +16,13 @@ class UserRepository(BaseRepository[User]):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
+    async def create(self, data: dict) -> User:
+        try:
+            return await super().create(data)
+        except IntegrityError:
+            raise UserAlreadyExistsError()
+
     async def get_by_username(self, username: str) -> User | None:
         query = select(User).where(User.username == username)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
-
-    async def is_user_exists(self, email: str, username: str) -> bool:
-        query = select(User).where(or_(User.email == email, User.username == username))
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none() is not None

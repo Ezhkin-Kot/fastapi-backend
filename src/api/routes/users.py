@@ -22,14 +22,8 @@ async def get_db():
 async def register_user(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     repo = UserRepository(db)
 
-    if await repo.is_user_exists(email=user_in.email, username=user_in.username):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email or username already exists",
-        )
-
     user_data = user_in.model_dump()
-    password_plain = user_in.password.get_secret_value()
+    password_plain = str(user_in.password.get_secret_value())
     user_data["password_hash"] = password_plain
     del user_data["password"]
 

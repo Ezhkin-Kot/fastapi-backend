@@ -1,7 +1,8 @@
+import re
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field, SecretStr
+from pydantic import BaseModel, EmailStr, Field, SecretStr, validator
 
 
 class UserBase(BaseModel):
@@ -13,6 +14,15 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: SecretStr = Field(min_length=8, max_length=255)
+
+    @validator("password")
+    def password_complexity(cls, v: SecretStr):
+        password = v.get_secret_value()
+        if not re.search(r"\d", password):
+            raise ValueError("Password must contain at least one digit.")
+        if not re.search(r"[a-zA-Z]", password):
+            raise ValueError("Password must contain at least one letter.")
+        return v
 
 
 class UserUpdate(BaseModel):

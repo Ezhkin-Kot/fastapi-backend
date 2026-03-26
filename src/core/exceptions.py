@@ -3,20 +3,25 @@ from typing import Final
 from fastapi import HTTPException, status
 
 
-class UserNotFound(BaseException):
-    _ERROR_MESSAGE_TEMPLATE: Final[str] = "User with id {id} not found"
+class BaseException(Exception):
     message: str
+
+
+class UserNotFoundError(BaseException):
+    _ERROR_MESSAGE_TEMPLATE: Final[str] = "User with id {id} not found"
 
     def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
 
-class UserAlreadyExists(BaseException):
-    _ERROR_MESSAGE_TEMPLATE: Final[str] = "User with email {email} already exists"
+class UserAlreadyExistsError(BaseException):
+    _ERROR_MESSAGE_TEMPLATE: Final[str] = (
+        "User with such email or username already exists"
+    )
 
-    def __init__(self, email: str) -> None:
-        self.message = self._ERROR_MESSAGE_TEMPLATE.format(email=email)
+    def __init__(self) -> None:
+        self.message = self._ERROR_MESSAGE_TEMPLATE
         super().__init__(self.message)
 
 

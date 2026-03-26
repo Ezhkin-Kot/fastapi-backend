@@ -11,7 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import DeclarativeBase
 
 from src.core.config import settings
-from src.core.exceptions import DatabaseError
+from src.core.exceptions import DatabaseError, UserAlreadyExistsError
+
+
+from fastapi.exceptions import RequestValidationError
 
 
 class PostgresDatabase:
@@ -31,7 +34,7 @@ class PostgresDatabase:
             try:
                 yield session
                 await session.commit()
-            except HTTPException:
+            except (HTTPException, RequestValidationError, UserAlreadyExistsError):
                 raise
             except (Exception, PendingRollbackError) as error:
                 await session.rollback()
