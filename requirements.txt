@@ -1,6 +1,9 @@
-fastapi
-uvicorn[standard]
-SQLAlchemy
-psycopg2-binary
 alembic
+asyncpg
+greenlet
+fastapi
+psycopg2-binary
 pydantic-settings
+pydantic[email]
+SQLAlchemy
+uvicorn[standard]
