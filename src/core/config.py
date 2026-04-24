@@ -15,6 +15,10 @@ class Settings(BaseSettings):
 
     POSTGRES_SCHEMA: str = "public"
 
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
     @computed_field
     @property
     def postgres_url(self) -> str:

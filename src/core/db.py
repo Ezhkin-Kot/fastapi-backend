@@ -56,3 +56,8 @@ class Base(DeclarativeBase):
         datetime: DateTime(timezone=True),
         bool: Boolean,
     }
+
+
+async def get_async_session() -> AsyncIterator[AsyncSession]:
+    async with database.session() as session:
+        yield session

@@ -2,9 +2,11 @@ import datetime
 import uuid
 from typing import List
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from schemas.posts import PostCreate, PostResponse, PostUpdate
+from src.models.users import User
+from src.services.auth import get_current_user
 
 router = APIRouter()
 
@@ -12,7 +14,9 @@ fake_db = []
 
 
 @router.post("/", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
-async def create_post(post: PostCreate) -> PostResponse:
+async def create_post(
+    post: PostCreate, current_user: User = Depends(get_current_user)
+) -> PostResponse:
     new_post = PostResponse(
         id=uuid.uuid4(),
         created_at=datetime.datetime.now(datetime.timezone.utc),
@@ -25,12 +29,16 @@ async def create_post(post: PostCreate) -> PostResponse:
 
 
 @router.get("/", response_model=List[PostResponse])
-async def get_posts() -> List[PostResponse]:
+async def get_posts(
+    current_user: User = Depends(get_current_user),
+) -> List[PostResponse]:
     return fake_db
 
 
 @router.get("/{post_id}", response_model=PostResponse)
-async def get_post(post_id: uuid.UUID) -> PostResponse:
+async def get_post(
+    post_id: uuid.UUID, current_user: User = Depends(get_current_user)
+) -> PostResponse:
     post = next((post for post in fake_db if post.id == post_id), None)
     if post is None:
         raise HTTPException(
@@ -41,7 +49,11 @@ async def get_post(post_id: uuid.UUID) -> PostResponse:
 
 
 @router.put("/{post_id}", response_model=PostResponse)
-async def update_post(post_id: uuid.UUID, post_update: PostUpdate) -> PostResponse:
+async def update_post(
+    post_id: uuid.UUID,
+    post_update: PostUpdate,
+    current_user: User = Depends(get_current_user),
+) -> PostResponse:
     post_index = next(
         (index for index, post in enumerate(fake_db) if post.id == post_id), None
     )
@@ -59,7 +71,9 @@ async def update_post(post_id: uuid.UUID, post_update: PostUpdate) -> PostRespon
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_post(post_id: uuid.UUID):
+async def delete_post(
+    post_id: uuid.UUID, current_user: User = Depends(get_current_user)
+):
     post_index = next(
         (index for index, post in enumerate(fake_db) if post.id == post_id), None
     )
