@@ -6,6 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 from src.api.routes.posts import router as posts_router
 from src.api.routes.users import router as users_router
 from src.api.routes.auth import router as auth_router
+from src.api.routes.comments import router as comments_router
 from src.core.exceptions import DatabaseError, UserAlreadyExistsError
 
 
@@ -52,6 +53,9 @@ def create_app() -> FastAPI:
 
     app.include_router(users_router, prefix="/users", tags=["User APIs"])
     app.include_router(posts_router, prefix="/posts", tags=["Post APIs"])
+    app.include_router(
+        comments_router, prefix="/posts/{post_id}/comments", tags=["Comment APIs"]
+    )
     app.include_router(auth_router, prefix="/auth", tags=["Auth APIs"])
 
     return app

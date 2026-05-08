@@ -25,3 +25,6 @@ class CategoryUpdate(BaseModel):
 class CategoryResponse(CategoryBase):
     id: uuid.UUID
     created_at: datetime
+
+    class Config:
+        from_attributes = True

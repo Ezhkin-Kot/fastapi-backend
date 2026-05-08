@@ -42,3 +42,6 @@ class UserResponse(UserBase):
     is_active: bool = True
     is_superuser: bool = False
     created_at: datetime | None = None
+
+    class Config:
+        from_attributes = True

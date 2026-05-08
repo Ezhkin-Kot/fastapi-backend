@@ -12,7 +12,6 @@ class PostBase(BaseModel):
 
 
 class PostCreate(PostBase):
-    author_id: uuid.UUID
     category_id: uuid.UUID | None = None
     location_id: uuid.UUID | None = None
 
@@ -34,3 +33,6 @@ class PostResponse(PostBase):
     image: str | None = None
     created_at: datetime
     comment_count: int | None = None
+
+    class Config:
+        from_attributes = True

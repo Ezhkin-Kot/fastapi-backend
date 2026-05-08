@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime
 
+from typing import List
 from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.db import Base
 
@@ -19,3 +20,6 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
     is_superuser: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    posts: Mapped[List["Post"]] = relationship(back_populates="author")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="author")
