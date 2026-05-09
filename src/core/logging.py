@@ -1,6 +1,7 @@
 import logging
 import sys
 
+
 def configure_logging():
     log_formatter = logging.Formatter(
         "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
