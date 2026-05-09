@@ -5,14 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from schemas.posts import PostCreate, PostResponse, PostUpdate
-from src.core.db import get_async_session
-from src.domain.post.use_cases.create_post import CreatePostUseCase
-from src.domain.post.use_cases.delete_post import DeletePostUseCase
-from src.domain.post.use_cases.get_post import GetPostUseCase
-from src.domain.post.use_cases.get_posts import GetPostsUseCase
-from src.domain.post.use_cases.update_post import UpdatePostUseCase
-from src.models.users import User
-from src.services.auth import get_current_user
+from core.db import get_async_session
+from domain.post.use_cases.create_post import CreatePostUseCase
+from domain.post.use_cases.delete_post import DeletePostUseCase
+from domain.post.use_cases.get_post import GetPostUseCase
+from domain.post.use_cases.get_posts import GetPostsUseCase
+from domain.post.use_cases.update_post import UpdatePostUseCase
+from models.users import User
+from services.auth import get_current_user
 
 router = APIRouter()
 

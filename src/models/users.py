@@ -5,7 +5,7 @@ from typing import List
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.core.db import Base
+from core.db import Base
 
 
 class User(Base):

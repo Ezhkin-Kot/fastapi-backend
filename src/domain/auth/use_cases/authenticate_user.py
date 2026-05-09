@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.users import User
-from src.repositories.users import UserRepository
-from src.resources.auth import verify_password
+from models.users import User
+from repositories.users import UserRepository
+from resources.auth import verify_password
 
 
 class AuthenticateUserUseCase:

@@ -2,9 +2,9 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from schemas.comments import CommentCreate
-from src.models.comments import Comment
-from src.models.users import User
-from src.repositories.comments import CommentRepository
+from models.comments import Comment
+from models.users import User
+from repositories.comments import CommentRepository
 
 
 class CreateCommentUseCase:

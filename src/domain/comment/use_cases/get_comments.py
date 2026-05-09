@@ -3,8 +3,8 @@ from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.comments import Comment
-from src.repositories.comments import CommentRepository
+from models.comments import Comment
+from repositories.comments import CommentRepository
 
 
 class GetCommentsUseCase:

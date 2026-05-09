@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from jose import jwt
 
-from src.core.config import settings
+from core.config import settings
 
 
 class CreateAccessTokenUseCase:

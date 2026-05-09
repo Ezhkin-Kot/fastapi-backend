@@ -1,8 +1,8 @@
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.posts import Post
-from src.repositories.posts import PostRepository
+from models.posts import Post
+from repositories.posts import PostRepository
 
 
 class GetPostUseCase:

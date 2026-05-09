@@ -4,11 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from fastapi import Depends, HTTPException
 
-from src.core.config import settings
-from src.core.db import get_async_session
-from src.models.users import User
-from src.repositories.users import UserRepository
-from src.resources.auth import oauth2_scheme
+from core.config import settings
+from core.db import get_async_session
+from models.users import User
+from repositories.users import UserRepository
+from resources.auth import oauth2_scheme
 
 
 class Token(BaseModel):
