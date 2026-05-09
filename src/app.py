@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
@@ -8,13 +10,29 @@ from src.api.routes.users import router as users_router
 from src.api.routes.auth import router as auth_router
 from src.api.routes.comments import router as comments_router
 from src.core.exceptions import DatabaseError, UserAlreadyExistsError
+from src.core.logging import configure_logging
+from src.api.middleware.logging import logging_middleware
+
+logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
+    configure_logging()
     app = FastAPI(root_path="/api/v1")
+
+    app.middleware("http")(logging_middleware)
+
+    @app.exception_handler(Exception)
+    async def generic_exception_handler(request: Request, exc: Exception):
+        logger.exception(f"Unhandled exception: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": "Internal server error."},
+        )
 
     @app.exception_handler(DatabaseError)
     async def database_error_handler(request: Request, exc: DatabaseError):
+        logger.error(f"Database error: {exc}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": "Database error occurred."},
@@ -24,6 +42,7 @@ def create_app() -> FastAPI:
     async def user_already_exists_handler(
         request: Request, exc: UserAlreadyExistsError
     ):
+        logger.warning(f"User already exists: {exc.message}")
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": exc.message},
@@ -38,6 +57,7 @@ def create_app() -> FastAPI:
             field = ".".join(str(loc) for loc in error["loc"])
             message = error["msg"]
             errors.append(f"{field}: {message}")
+        logger.warning(f"Validation error: {errors}")
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"detail": errors},
