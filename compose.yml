@@ -1,6 +1,15 @@
+networks:
+  fastapi_network:
+    name: fastapi_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
 services:
   postgres:
     image: postgres:18.1
+    restart: always
     container_name: fastapi_pg
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -8,6 +17,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql
+    networks:
+      - fastapi_network
     ports:
       - "1301:5432"
     healthcheck:
@@ -19,6 +30,24 @@ services:
     env_file:
       - path: .env
         required: false
+
+  backend:
+    image: application
+    volumes:
+      - ./src:/app/src
+      - ./images:/images
+    env_file:
+      - .env
+    networks:
+      - fastapi_network
+    ports:
+      - 8000:8000
+    build:
+      context: .
+    depends_on:
+      - postgres
+    pull_policy: build
+    entrypoint: sh -c "./src/start.sh"
 
 volumes:
   postgres_data:
