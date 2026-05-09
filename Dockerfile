@@ -1,6 +1,7 @@
 FROM python:3.13.13-alpine
 
 ENV PATH="${PATH}:/root/.local/bin"
+COPY ./migrations /app/migrations
 COPY ./src /app/src
 COPY alembic /app/alembic
 COPY alembic.ini /app/
