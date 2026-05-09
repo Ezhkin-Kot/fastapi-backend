@@ -20,9 +20,19 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python -m venv venv
+        source venv/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
 
     - name: Run tests
       run: |
+        source venv/bin/activate
         pytest
+      env:
+        POSTGRES_USER: test_user
+        POSTGRES_PASSWORD: test_password
+        POSTGRES_DB: test_db
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        SECRET_KEY: super-secret-key
