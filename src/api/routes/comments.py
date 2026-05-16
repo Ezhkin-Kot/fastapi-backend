@@ -4,12 +4,12 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.comments import CommentCreate, CommentResponse
-from core.db import get_async_session
-from domain.comment.use_cases.create_comment import CreateCommentUseCase
-from domain.comment.use_cases.get_comments import GetCommentsUseCase
-from models.users import User
-from services.auth import get_current_user
+from src.schemas.comments import CommentCreate, CommentResponse
+from src.db.db import get_async_session
+from src.domain.comment.use_cases.create_comment import CreateCommentUseCase
+from src.domain.comment.use_cases.get_comments import GetCommentsUseCase
+from src.db.models.users import User
+from src.services.auth import get_current_user
 
 router = APIRouter()
 

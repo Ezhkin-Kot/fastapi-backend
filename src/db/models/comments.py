@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from core.db import Base
+from src.db.db import Base
 
 
 class Comment(Base):

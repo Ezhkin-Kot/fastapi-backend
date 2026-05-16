@@ -1,9 +1,9 @@
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.posts import PostUpdate
-from models.posts import Post
-from repositories.posts import PostRepository
+from src.schemas.posts import PostUpdate
+from src.db.models.posts import Post
+from src.db.repositories.posts import PostRepository
 
 
 class UpdatePostUseCase:

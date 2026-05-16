@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.posts import PostCreate
-from models.posts import Post
-from models.users import User
-from repositories.posts import PostRepository
+from src.schemas.posts import PostCreate
+from src.db.models.posts import Post
+from src.db.models.users import User
+from src.db.repositories.posts import PostRepository
 
 
 class CreatePostUseCase:

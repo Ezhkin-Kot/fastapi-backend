@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.users import UserCreate
-from models.users import User
-from repositories.users import UserRepository
-from resources.auth import get_password_hash
+from src.schemas.users import UserCreate
+from src.db.models.users import User
+from src.db.repositories.users import UserRepository
+from src.resources.auth import get_password_hash
 
 
 class CreateUserUseCase:

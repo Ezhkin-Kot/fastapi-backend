@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repositories.posts import PostRepository
+from src.db.repositories.posts import PostRepository
 
 
 class DeletePostUseCase:

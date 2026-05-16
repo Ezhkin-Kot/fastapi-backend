@@ -2,9 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.exceptions import UserAlreadyExistsError
-from models.users import User
-from repositories.base import BaseRepository
+from src.core.exceptions import UserAlreadyExistsError
+from src.db.models.users import User
+from src.db.repositories.base import BaseRepository
 
 
 class UserRepository(BaseRepository[User]):

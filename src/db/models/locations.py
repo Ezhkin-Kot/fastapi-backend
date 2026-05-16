@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.db import Base
+from src.db.db import Base
 
 
 class Location(Base):

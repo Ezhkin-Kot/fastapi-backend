@@ -5,13 +5,13 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.middleware.cors import CORSMiddleware
 
-from api.routes.posts import router as posts_router
-from api.routes.users import router as users_router
-from api.routes.auth import router as auth_router
-from api.routes.comments import router as comments_router
-from core.exceptions import DatabaseError, UserAlreadyExistsError
-from core.logging import configure_logging
-from api.middleware.logging import logging_middleware
+from src.api.routes.posts import router as posts_router
+from src.api.routes.users import router as users_router
+from src.api.routes.auth import router as auth_router
+from src.api.routes.comments import router as comments_router
+from src.core.exceptions import DatabaseError, UserAlreadyExistsError
+from src.core.logging import configure_logging
+from src.api.middleware.logging import logging_middleware
 
 logger = logging.getLogger(__name__)
 
