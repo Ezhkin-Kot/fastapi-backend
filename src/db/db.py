@@ -3,18 +3,12 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, AsyncIterator, Dict
 
-from fastapi import HTTPException
 from sqlalchemy import JSON, Boolean, DateTime, MetaData, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from src.core.config import settings
-from src.core.exceptions import DatabaseError, UserAlreadyExistsError
-
-
-from fastapi.exceptions import RequestValidationError
 
 
 class Database:
