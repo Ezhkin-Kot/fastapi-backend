@@ -1,11 +1,15 @@
+import sys
+import os
 import asyncio
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.orm import sessionmaker
 
-from app import create_app
-from core.db import get_async_session, Base
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from src.app import create_app
+from src.db.db import Base, Database, database
 
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -15,10 +19,17 @@ TestingSessionLocal = sessionmaker(
 )
 
 
-async def override_get_async_session():
-    async with TestingSessionLocal() as session:
-        yield session
-        await session.commit()
+test_database = Database()
+test_database._engine = engine
+test_database._session_factory = sessionmaker(
+    bind=test_database._engine,
+    autocommit=False,
+    autoflush=False,
+    expire_on_commit=False,
+    class_=AsyncSession,
+)
+
+database.session = test_database.session
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +39,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="function", autouse=True)
 async def setup_db():
     for table in Base.metadata.tables.values():
         table.schema = None
@@ -40,9 +51,8 @@ async def setup_db():
 
 
 @pytest.fixture(scope="function")
-async def test_app(setup_db):
+async def test_app():
     app = create_app()
-    app.dependency_overrides[get_async_session] = override_get_async_session
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as client:
