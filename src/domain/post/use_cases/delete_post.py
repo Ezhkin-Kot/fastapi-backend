@@ -1,16 +1,17 @@
 import uuid
-from sqlalchemy.ext.asyncio import AsyncSession
-
+from src.db.db import database
 from src.db.repositories.posts import PostRepository
 
 
 class DeletePostUseCase:
-    def __init__(self, session: AsyncSession):
-        self.repository = PostRepository(session)
+    def __init__(self):
+        pass
 
     async def execute(self, post_id: uuid.UUID) -> bool:
-        post = await self.repository.get(post_id)
-        if not post:
-            return False
-        await self.repository.delete(post)
-        return True
+        async with database.session() as session:
+            self.repository = PostRepository(session)
+            post = await self.repository.get(post_id)
+            if not post:
+                return False
+            await self.repository.delete(post)
+            return True

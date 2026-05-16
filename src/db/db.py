@@ -17,7 +17,7 @@ from src.core.exceptions import DatabaseError, UserAlreadyExistsError
 from fastapi.exceptions import RequestValidationError
 
 
-class PostgresDatabase:
+class Database:
     def __init__(self) -> None:
         self._engine = create_async_engine(settings.postgres_url)
         self._session_factory = async_sessionmaker(
@@ -34,16 +34,12 @@ class PostgresDatabase:
             try:
                 yield session
                 await session.commit()
-            except (HTTPException, RequestValidationError, UserAlreadyExistsError):
-                raise
-            except (Exception, PendingRollbackError) as error:
+            except Exception:
                 await session.rollback()
-                raise DatabaseError(message=repr(error))
-            finally:
-                await session.close()
+                raise
 
 
-database = PostgresDatabase()
+database = Database()
 metadata = MetaData(schema=settings.POSTGRES_SCHEMA)
 
 
@@ -56,8 +52,3 @@ class Base(DeclarativeBase):
         datetime: DateTime(timezone=True),
         bool: Boolean,
     }
-
-
-async def get_async_session() -> AsyncIterator[AsyncSession]:
-    async with database.session() as session:
-        yield session

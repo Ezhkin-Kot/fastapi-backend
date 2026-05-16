@@ -33,9 +33,7 @@ class BaseRepository(Generic[T]):
                 setattr(db_obj, field, update_data[field])
 
         self.session.add(db_obj)
-        await self.session.flush()
         return db_obj
 
     async def delete(self, db_obj: T) -> None:
         await self.session.delete(db_obj)
-        await self.session.flush()
