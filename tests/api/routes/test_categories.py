@@ -1,55 +1,7 @@
 import pytest
 from httpx import AsyncClient
-from datetime import datetime, timezone
 
-
-# Helper functions
-async def create_user_and_login(
-    test_app: AsyncClient, user_suffix: str, is_superuser: bool = False
-):
-    user_data = {
-        "first_name": "Test",
-        "last_name": "User",
-        "username": f"testuser_{user_suffix}",
-        "email": f"testuser_{user_suffix}@example.com",
-        "password": "Password123",
-        "is_superuser": is_superuser,
-    }
-    register_response = await test_app.post("/api/v1/users/register", json=user_data)
-    assert register_response.status_code == 201
-    user_id = register_response.json()["id"]
-    login_data = {"username": user_data["username"], "password": user_data["password"]}
-    token_response = await test_app.post("/api/v1/auth/token", data=login_data)
-    assert token_response.status_code == 200
-    token = token_response.json()["access_token"]
-    return token, user_id
-
-
-async def create_category(test_app: AsyncClient, token: str, slug: str, title: str):
-    headers = {"Authorization": f"Bearer {token}"}
-    category_data = {"title": title, "description": "desc", "slug": slug}
-    response = await test_app.post(
-        "/api/v1/categories/", headers=headers, json=category_data
-    )
-    assert response.status_code == 200
-    return response.json()
-
-
-async def create_post(
-    test_app: AsyncClient, token: str, title: str, category_id: str = None
-):
-    headers = {"Authorization": f"Bearer {token}"}
-    post_data = {
-        "title": title,
-        "text": "Some text",
-        "pub_date": datetime.now(timezone.utc).isoformat(),
-        "category_id": category_id,
-    }
-    create_post_response = await test_app.post(
-        "/api/v1/posts/", headers=headers, json=post_data
-    )
-    assert create_post_response.status_code == 201
-    return create_post_response.json()
+from tests.helpers import create_user_and_login, create_category, create_post
 
 
 @pytest.mark.asyncio
