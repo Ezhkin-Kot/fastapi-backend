@@ -14,18 +14,12 @@ class UserRepository(BaseRepository[User]):
         super().__init__(User, session)
 
     async def get_by_id_with_posts(self, user_id: uuid.UUID) -> User | None:
-        query = (
-            select(User)
-            .where(User.id == user_id)
-            .options(joinedload(User.posts))
-        )
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
+        query = select(User).where(User.id == user_id).options(joinedload(User.posts))
+        return await self.session.scalar(query)
 
     async def get_by_email(self, email: str) -> User | None:
         query = select(User).where(User.email == email)
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
+        return await self.session.scalar(query)
 
     async def create(self, data: dict) -> User:
         try:
@@ -35,5 +29,4 @@ class UserRepository(BaseRepository[User]):
 
     async def get_by_username(self, username: str) -> User | None:
         query = select(User).where(User.username == username)
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
+        return await self.session.scalar(query)

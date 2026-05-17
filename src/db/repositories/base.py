@@ -1,6 +1,6 @@
-from typing import Any, Generic, Sequence, Type, TypeVar
+from typing import Any, Generic, Sequence, Tuple, Type, TypeVar
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.db import Base
@@ -16,6 +16,19 @@ class BaseRepository(Generic[T]):
     async def get(self, obj_id: Any) -> T | None:
         return await self.session.get(self.model, obj_id)
 
+    async def get_all_paginated(
+        self, skip: int = 0, limit: int = 10
+    ) -> Tuple[Sequence[T], int]:
+        query = select(self.model).offset(skip).limit(limit)
+        result = await self.session.execute(query)
+        items = result.scalars().all()
+
+        count_query = select(func.count(self.model.id))
+        total_count_result = await self.session.execute(count_query)
+        total = total_count_result.scalar_one()
+
+        return items, total
+
     async def get_all(self) -> Sequence[T]:
         query = select(self.model)
         result = await self.session.execute(query)
@@ -24,7 +37,6 @@ class BaseRepository(Generic[T]):
     async def create(self, data: dict) -> T:
         db_obj = self.model(**data)
         self.session.add(db_obj)
-        await self.session.flush()
         return db_obj
 
     async def update(self, db_obj: T, update_data: dict) -> T:

@@ -4,14 +4,25 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from starlette.staticfiles import StaticFiles
+from sqladmin import Admin
 
+from src.admin import (
+    AdminAuthBackend,
+    UserAdmin,
+    PostAdmin,
+    CategoryAdmin,
+    CommentAdmin,
+    LocationAdmin,
+)
 from src.api.routes.posts import router as posts_router
 from src.api.routes.users import router as users_router
 from src.api.routes.auth import router as auth_router
 from src.api.routes.comments import router as comments_router
 from src.api.routes.comments_actions import router as comments_actions_router
 from src.api.routes.categories import router as categories_router
+from src.core.config import settings
 from src.core.exceptions import (
     DatabaseError,
     UserAlreadyExistsError,
@@ -20,6 +31,7 @@ from src.core.exceptions import (
 )
 from src.core.logging import configure_logging
 from src.api.middleware.logging import logging_middleware
+from src.db.db import database
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +40,7 @@ def create_app() -> FastAPI:
     configure_logging()
     app = FastAPI(root_path="/api/v1")
 
+    app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -39,6 +52,19 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
     app.middleware("http")(logging_middleware)
+
+    authentication_backend = AdminAuthBackend(secret_key=settings.SECRET_KEY)
+    admin = Admin(
+        app,
+        database._engine,
+        authentication_backend=authentication_backend,
+        base_url="/admin",
+    )
+    admin.add_view(UserAdmin)
+    admin.add_view(PostAdmin)
+    admin.add_view(CommentAdmin)
+    admin.add_view(CategoryAdmin)
+    admin.add_view(LocationAdmin)
 
     @app.exception_handler(Exception)
     async def generic_exception_handler(request: Request, exc: Exception):

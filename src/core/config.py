@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     IMAGE_UPLOAD_DIR: str = "static/images/posts"
+    PAGINATION_SIZE: int = 10
 
     @computed_field
     @property

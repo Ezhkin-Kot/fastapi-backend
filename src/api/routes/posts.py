@@ -2,10 +2,11 @@ import uuid
 from typing import List
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
 from fastapi.responses import FileResponse
 
 from src.schemas.posts import PostCreate, PostResponse, PostUpdate
+from src.schemas.pagination import PaginatedResponse
 from src.api.dependencies import (
     create_post_use_case,
     delete_post_use_case,
@@ -39,12 +40,19 @@ async def create_post(
     return PostResponse.model_validate(new_post)
 
 
-@router.get("/", response_model=List[PostResponse])
+@router.get("/", response_model=PaginatedResponse[PostResponse])
 async def get_posts(
+    page: int = 1,
+    size: int = Query(default=settings.PAGINATION_SIZE, ge=1, le=100),
     use_case: GetPostsUseCase = Depends(get_posts_use_case),
-) -> List[PostResponse]:
-    posts = await use_case.execute()
-    return [PostResponse.model_validate(p) for p in posts]
+) -> PaginatedResponse[PostResponse]:
+    posts, total = await use_case.execute(page=page, size=size)
+    return PaginatedResponse(
+        total=total,
+        page=page,
+        size=size,
+        results=[PostResponse.model_validate(p) for p in posts],
+    )
 
 
 @router.get("/{post_id}", response_model=PostResponse)
@@ -122,8 +130,7 @@ async def upload_post_image(
 ) -> PostResponse:
     if not file.content_type.startswith("image/"):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only image files are allowed",
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Only image files are allowed"
         )
 
     file_extension = file.filename.split(".")[-1]
