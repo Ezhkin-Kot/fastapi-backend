@@ -3,11 +3,16 @@ from src.domain.post.use_cases.get_posts import GetPostsUseCase
 from src.domain.post.use_cases.get_post import GetPostUseCase
 from src.domain.post.use_cases.delete_post import DeletePostUseCase
 from src.domain.post.use_cases.update_post import UpdatePostUseCase
+from src.domain.post.use_cases.get_posts_by_category import GetPostsByCategoryUseCase
+from src.domain.post.use_cases.update_post_image import UpdatePostImageUseCase
 from src.domain.auth.use_cases.create_access_token import CreateAccessTokenUseCase
 from src.domain.auth.use_cases.authenticate_user import AuthenticateUserUseCase
 from src.domain.comment.use_cases.create_comment import CreateCommentUseCase
 from src.domain.comment.use_cases.get_comments import GetCommentsUseCase
+from src.domain.comment.use_cases.update_comment import UpdateCommentUseCase
+from src.domain.comment.use_cases.delete_comment import DeleteCommentUseCase
 from src.domain.user.use_cases.create_user import CreateUserUseCase
+from src.domain.user.use_cases.get_user import GetUserUseCase
 
 
 def create_post_use_case() -> CreatePostUseCase:
@@ -30,6 +35,14 @@ def update_post_use_case() -> UpdatePostUseCase:
     return UpdatePostUseCase()
 
 
+def get_posts_by_category_use_case() -> GetPostsByCategoryUseCase:
+    return GetPostsByCategoryUseCase()
+
+
+def update_post_image_use_case() -> UpdatePostImageUseCase:
+    return UpdatePostImageUseCase()
+
+
 def create_access_token_use_case() -> CreateAccessTokenUseCase:
     return CreateAccessTokenUseCase()
 
@@ -46,5 +59,17 @@ def get_comments_use_case() -> GetCommentsUseCase:
     return GetCommentsUseCase()
 
 
+def update_comment_use_case() -> UpdateCommentUseCase:
+    return UpdateCommentUseCase()
+
+
+def delete_comment_use_case() -> DeleteCommentUseCase:
+    return DeleteCommentUseCase()
+
+
 def create_user_use_case() -> CreateUserUseCase:
     return CreateUserUseCase()
+
+
+def get_user_use_case() -> GetUserUseCase:
+    return GetUserUseCase()

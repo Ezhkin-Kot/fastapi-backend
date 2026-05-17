@@ -1,6 +1,7 @@
 import re
 import uuid
 from datetime import datetime
+from typing import List
 
 from pydantic import (
     BaseModel,
@@ -10,6 +11,8 @@ from pydantic import (
     SecretStr,
     field_validator,
 )
+
+from src.schemas.posts import PostResponse
 
 
 class UserBase(BaseModel):
@@ -49,5 +52,6 @@ class UserResponse(UserBase):
     is_active: bool = True
     is_superuser: bool = False
     created_at: datetime | None = None
+    posts: List[PostResponse] = []
 
     model_config = ConfigDict(from_attributes=True)

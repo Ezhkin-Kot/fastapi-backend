@@ -33,6 +33,18 @@ class DatabaseError(BaseException):
         super().__init__(self.message)
 
 
+class NotFoundError(BaseException):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
+class ForbiddenError(BaseException):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
 class CredentialsException(HTTPException):
     def __init__(self, detail: str) -> None:
         self.detail = detail
