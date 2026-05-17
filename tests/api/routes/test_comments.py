@@ -1,98 +1,131 @@
-from httpx import AsyncClient
+import uuid
 import pytest
+from httpx import AsyncClient
 from datetime import datetime, timezone
 
 
-@pytest.mark.asyncio
-async def test_create_comment(test_app):
+# Helper function to create a user and log in, returning the token and user ID
+async def create_user_and_login(test_app: AsyncClient, user_suffix: str):
     user_data = {
         "first_name": "Test",
         "last_name": "User",
-        "username": "testuser_comment",
-        "email": "testuser_comment@example.com",
+        "username": f"testuser_{user_suffix}",
+        "email": f"testuser_{user_suffix}@example.com",
         "password": "Password123",
     }
-    # Register user
     register_response = await test_app.post("/api/v1/users/register", json=user_data)
     assert register_response.status_code == 201
-
-    # Login to get token
+    user_id = register_response.json()["id"]
     login_data = {"username": user_data["username"], "password": user_data["password"]}
-    response = await test_app.post("/api/v1/auth/token", data=login_data)
-    assert response.status_code == 200
-    token = response.json()["access_token"]
+    token_response = await test_app.post("/api/v1/auth/token", data=login_data)
+    assert token_response.status_code == 200
+    token = token_response.json()["access_token"]
+    return token, user_id
 
-    # Create post
+
+# Helper function to create a post
+async def create_post(test_app: AsyncClient, token: str, title: str):
     headers = {"Authorization": f"Bearer {token}"}
     post_data = {
-        "title": "Test Post for Comment",
-        "text": "This is a test post for comment.",
+        "title": title,
+        "text": "Some text",
         "pub_date": datetime.now(timezone.utc).isoformat(),
     }
     create_post_response = await test_app.post(
         "/api/v1/posts/", headers=headers, json=post_data
     )
     assert create_post_response.status_code == 201
-    post_id = create_post_response.json()["id"]
+    return create_post_response.json()["id"]
 
-    # Create comment
-    comment_data = {"text": "This is a test comment."}
+
+# Helper function to create a comment
+async def create_comment(
+    test_app: AsyncClient, token: str, post_id: uuid.UUID, text: str
+):
+    headers = {"Authorization": f"Bearer {token}"}
+    comment_data = {"text": text}
     response = await test_app.post(
         f"/api/v1/posts/{post_id}/comments/", headers=headers, json=comment_data
     )
     assert response.status_code == 201
-    response_data = response.json()
-    assert response_data["text"] == comment_data["text"]
-    assert "id" in response_data
+    return response.json()["id"]
 
 
 @pytest.mark.asyncio
-async def test_get_comments(test_app):
-    user_data = {
-        "first_name": "Test",
-        "last_name": "User",
-        "username": "testuser_get_comments",
-        "email": "testuser_get_comments@example.com",
-        "password": "Password123",
-    }
-    # Register user
-    register_response = await test_app.post("/api/v1/users/register", json=user_data)
-    assert register_response.status_code == 201
-
-    # Login to get token
-    login_data = {"username": user_data["username"], "password": user_data["password"]}
-    response = await test_app.post("/api/v1/auth/token", data=login_data)
-    assert response.status_code == 200
-    token = response.json()["access_token"]
-
-    # Create post
-    headers = {"Authorization": f"Bearer {token}"}
-    post_data = {
-        "title": "Test Post for Comments",
-        "text": "This is a test post for comments.",
-        "pub_date": datetime.now(timezone.utc).isoformat(),
-    }
-    create_post_response = await test_app.post(
-        "/api/v1/posts/", headers=headers, json=post_data
-    )
-    assert create_post_response.status_code == 201
-    post_id = create_post_response.json()["id"]
+async def test_create_and_get_comments(test_app: AsyncClient):
+    token, _ = await create_user_and_login(test_app, "comments_user")
+    post_id = await create_post(test_app, token, "Post for Comments")
 
     # Create comments
-    comment1_data = {"text": "This is a test comment 1."}
-    comment2_data = {"text": "This is a test comment 2."}
-    await test_app.post(
-        f"/api/v1/posts/{post_id}/comments/", headers=headers, json=comment1_data
-    )
-    await test_app.post(
-        f"/api/v1/posts/{post_id}/comments/", headers=headers, json=comment2_data
-    )
+    await create_comment(test_app, token, post_id, "First comment")
+    await create_comment(test_app, token, post_id, "Second comment")
 
-    # Get all comments
+    # Get all comments for the post
     response = await test_app.get(f"/api/v1/posts/{post_id}/comments/")
     assert response.status_code == 200
     response_data = response.json()
-    assert len(response_data) >= 2
-    texts = [comment["text"] for comment in response_data]
-    assert comment1_data["text"] in texts
-    assert comment2_data["text"] in texts
+    assert len(response_data) == 2
+    assert {c["text"] for c in response_data} == {"First comment", "Second comment"}
+
+
+@pytest.mark.asyncio
+async def test_update_comment_author(test_app: AsyncClient):
+    token, _ = await create_user_and_login(test_app, "update_author")
+    post_id = await create_post(test_app, token, "Post for comment update")
+    comment_id = await create_comment(test_app, token, post_id, "Original comment")
+
+    # Update the comment
+    headers = {"Authorization": f"Bearer {token}"}
+    update_data = {"text": "This is an updated comment."}
+    response = await test_app.put(
+        f"/api/v1/comments/{comment_id}", headers=headers, json=update_data
+    )
+    assert response.status_code == 200
+    assert response.json()["text"] == "This is an updated comment."
+
+
+@pytest.mark.asyncio
+async def test_update_comment_not_author(test_app: AsyncClient):
+    token1, _ = await create_user_and_login(test_app, "update_not_author1")
+    post_id = await create_post(test_app, token1, "Post for comment update fail")
+    comment_id = await create_comment(test_app, token1, post_id, "User 1 comment")
+
+    token2, _ = await create_user_and_login(test_app, "update_not_author2")
+
+    headers2 = {"Authorization": f"Bearer {token2}"}
+    update_data = {"text": "This should fail."}
+    response = await test_app.put(
+        f"/api/v1/comments/{comment_id}", headers=headers2, json=update_data
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_delete_comment_author(test_app: AsyncClient):
+    token, _ = await create_user_and_login(test_app, "delete_author")
+    post_id = await create_post(test_app, token, "Post for comment delete")
+    comment_id = await create_comment(test_app, token, post_id, "Comment to delete")
+
+    headers = {"Authorization": f"Bearer {token}"}
+    response = await test_app.delete(f"/api/v1/comments/{comment_id}", headers=headers)
+    assert response.status_code == 204
+
+    # Verify it's gone
+    update_data = {"text": "This should fail."}
+    response_after_delete = await test_app.put(
+        f"/api/v1/comments/{comment_id}", headers=headers, json=update_data
+    )
+    assert response_after_delete.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_delete_comment_not_author(test_app: AsyncClient):
+    token1, _ = await create_user_and_login(test_app, "delete_not_author1")
+    post_id = await create_post(test_app, token1, "Post for comment delete fail")
+    comment_id = await create_comment(test_app, token1, post_id, "User 1 comment")
+
+    token2, _ = await create_user_and_login(test_app, "delete_not_author2")
+
+    headers2 = {"Authorization": f"Bearer {token2}"}
+    response = await test_app.delete(f"/api/v1/comments/{comment_id}", headers=headers2)
+    assert response.status_code == 403

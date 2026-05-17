@@ -1,10 +1,12 @@
 import uuid
 from datetime import datetime, timezone
 from typing import List
-from sqlalchemy import func, ForeignKey, String
+from sqlalchemy import func, ForeignKey, String, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from src.db.db import Base
+from src.db.models.comments import Comment
 
 
 class Post(Base):
@@ -26,4 +28,18 @@ class Post(Base):
     author: Mapped["User"] = relationship(back_populates="posts")
     category: Mapped["Category"] = relationship(back_populates="posts")
     location: Mapped["Location"] = relationship(back_populates="posts")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="post")
+    comments: Mapped[List["Comment"]] = relationship(
+        back_populates="post", cascade="all, delete-orphan"
+    )
+
+    @hybrid_property
+    def comment_count(self):
+        return len(self.comments)
+
+    @comment_count.expression
+    def comment_count(cls):
+        return (
+            select(func.count(Comment.id))
+            .where(Comment.post_id == cls.id)
+            .scalar_subquery()
+        )

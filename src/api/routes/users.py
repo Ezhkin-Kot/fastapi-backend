@@ -69,6 +69,7 @@ async def update_user(
 
         update_data = user_update.model_dump(exclude_unset=True)
         updated_user = await repo.update(db_user, update_data)
+        await session.refresh(updated_user, attribute_names=["posts"])
         return updated_user
 
 

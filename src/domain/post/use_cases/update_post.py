@@ -16,4 +16,7 @@ class UpdatePostUseCase:
             if not post:
                 return None
             update_data = post_update.model_dump(exclude_unset=True)
-            return await self.repository.update(post, update_data)
+            updated_post = await self.repository.update(post, update_data)
+            await session.flush()
+            await session.refresh(updated_post, attribute_names=["comments"])
+            return updated_post

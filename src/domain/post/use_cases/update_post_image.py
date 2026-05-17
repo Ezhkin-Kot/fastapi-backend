@@ -25,4 +25,6 @@ class UpdatePostImageUseCase:
 
             update_data = {"image": image_path}
             updated_post = await repo.update(post, update_data)
+            await session.flush()
+            await session.refresh(updated_post, attribute_names=["comments"])
             return updated_post

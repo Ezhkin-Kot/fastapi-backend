@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LocationBase(BaseModel):
@@ -18,9 +18,8 @@ class LocationUpdate(BaseModel):
     is_published: bool | None = None
 
 
-class Location(LocationBase):
+class LocationResponse(LocationBase):
     id: uuid.UUID
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

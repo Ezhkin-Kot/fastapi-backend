@@ -12,6 +12,10 @@ class CommentCreate(CommentBase):
     pass
 
 
+class CommentUpdate(BaseModel):
+    text: str | None = None
+
+
 class CommentResponse(CommentBase):
     id: uuid.UUID
     post_id: uuid.UUID

@@ -15,4 +15,6 @@ class CreatePostUseCase:
             post_data = post_in.model_dump()
             post_data["author_id"] = author.id
             new_post = await self.repository.create(post_data)
+            await session.flush()
+            await session.refresh(new_post, attribute_names=["comments"])
             return new_post

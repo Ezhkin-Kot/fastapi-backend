@@ -24,6 +24,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: SecretStr = Field(min_length=8, max_length=255)
+    is_superuser: bool = False
 
     @field_validator("password")
     def password_complexity(cls, v: SecretStr):

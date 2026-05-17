@@ -13,6 +13,11 @@ from src.domain.comment.use_cases.update_comment import UpdateCommentUseCase
 from src.domain.comment.use_cases.delete_comment import DeleteCommentUseCase
 from src.domain.user.use_cases.create_user import CreateUserUseCase
 from src.domain.user.use_cases.get_user import GetUserUseCase
+from src.domain.category.use_cases.create_category import CreateCategoryUseCase
+from src.domain.category.use_cases.get_all_categories import GetAllCategoriesUseCase
+from src.domain.category.use_cases.get_category import GetCategoryUseCase
+from src.domain.category.use_cases.update_category import UpdateCategoryUseCase
+from src.domain.category.use_cases.delete_category import DeleteCategoryUseCase
 
 
 def create_post_use_case() -> CreatePostUseCase:
@@ -73,3 +78,23 @@ def create_user_use_case() -> CreateUserUseCase:
 
 def get_user_use_case() -> GetUserUseCase:
     return GetUserUseCase()
+
+
+def create_category_use_case() -> CreateCategoryUseCase:
+    return CreateCategoryUseCase()
+
+
+def get_all_categories_use_case() -> GetAllCategoriesUseCase:
+    return GetAllCategoriesUseCase()
+
+
+def get_category_use_case() -> GetCategoryUseCase:
+    return GetCategoryUseCase()
+
+
+def update_category_use_case() -> UpdateCategoryUseCase:
+    return UpdateCategoryUseCase()
+
+
+def delete_category_use_case() -> DeleteCategoryUseCase:
+    return DeleteCategoryUseCase()
