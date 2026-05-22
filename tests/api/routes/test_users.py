@@ -19,8 +19,6 @@ async def test_register_user(test_app: AsyncClient):
     assert response_data["email"] == user_data["email"]
     assert response_data["username"] == user_data["username"]
     assert "id" in response_data
-    assert "posts" in response_data
-    assert response_data["posts"] == []
 
 
 @pytest.mark.asyncio
@@ -41,7 +39,6 @@ async def test_get_user(test_app: AsyncClient):
     assert response.status_code == 200
     response_data = response.json()
     assert response_data["id"] == user_id
-    assert "posts" in response_data
 
 
 @pytest.mark.asyncio
@@ -78,24 +75,6 @@ async def test_delete_own_user(test_app: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_get_user_with_posts(test_app: AsyncClient):
-    token, user_id = await create_user_and_login(test_app, "get_with_posts")
-    post1 = await create_post(test_app, token, "First Post")
-    post2 = await create_post(test_app, token, "Second Post")
-
-    headers = {"Authorization": f"Bearer {token}"}
-    response = await test_app.get(f"/api/v1/users/{user_id}", headers=headers)
-    assert response.status_code == 200
-    response_data = response.json()
-    assert response_data["id"] == user_id
-    assert "posts" in response_data
-    assert len(response_data["posts"]) == 2
-    post_titles = {p["title"] for p in response_data["posts"]}
-    assert post1["title"] in post_titles
-    assert post2["title"] in post_titles
-
-
-@pytest.mark.asyncio
 async def test_update_other_user_fails(test_app: AsyncClient):
     _, user1_id = await create_user_and_login(test_app, "update_other1")
     token2, _ = await create_user_and_login(test_app, "update_other2")
@@ -116,3 +95,60 @@ async def test_delete_other_user_fails(test_app: AsyncClient):
     headers2 = {"Authorization": f"Bearer {token2}"}
     response = await test_app.delete(f"/api/v1/users/{user1_id}", headers=headers2)
     assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_register_user_cannot_become_superuser(test_app: AsyncClient):
+    user_data = {
+        "first_name": "Tricky",
+        "last_name": "User",
+        "username": "trickyuser",
+        "email": "trickyuser@example.com",
+        "password": "Password123",
+        "is_superuser": True,  # Attempt to become a superuser
+    }
+    response = await test_app.post("/api/v1/users/register", json=user_data)
+    assert response.status_code == 201
+    response_data = response.json()
+    assert response_data["username"] == "trickyuser"
+    assert response_data["is_superuser"] is False
+
+
+@pytest.mark.asyncio
+async def test_get_user_posts_paginated(test_app: AsyncClient):
+    token, user_id = await create_user_and_login(test_app, "user_with_posts")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Create 3 posts for the user
+    for i in range(3):
+        await create_post(test_app, token, f"Post {i+1}")
+
+    # Test fetching all posts
+    response = await test_app.get(f"/api/v1/users/{user_id}/posts", headers=headers)
+    assert response.status_code == 200
+    paginated_response = response.json()
+    assert paginated_response["total"] == 3
+    assert len(paginated_response["results"]) == 3
+    assert {p["title"] for p in paginated_response["results"]} == {
+        "Post 1",
+        "Post 2",
+        "Post 3",
+    }
+
+    # Test pagination size
+    response = await test_app.get(
+        f"/api/v1/users/{user_id}/posts?page=1&size=2", headers=headers
+    )
+    assert response.status_code == 200
+    paginated_response = response.json()
+    assert paginated_response["total"] == 3
+    assert len(paginated_response["results"]) == 2
+
+    # Test pagination page
+    response = await test_app.get(
+        f"/api/v1/users/{user_id}/posts?page=2&size=2", headers=headers
+    )
+    assert response.status_code == 200
+    paginated_response = response.json()
+    assert paginated_response["total"] == 3
+    assert len(paginated_response["results"]) == 1
