@@ -4,6 +4,7 @@ from src.domain.post.use_cases.get_post import GetPostUseCase
 from src.domain.post.use_cases.delete_post import DeletePostUseCase
 from src.domain.post.use_cases.update_post import UpdatePostUseCase
 from src.domain.post.use_cases.get_posts_by_category import GetPostsByCategoryUseCase
+from src.domain.post.use_cases.get_posts_by_user import GetPostsByUserUseCase
 from src.domain.post.use_cases.update_post_image import UpdatePostImageUseCase
 from src.domain.auth.use_cases.create_access_token import CreateAccessTokenUseCase
 from src.domain.auth.use_cases.authenticate_user import AuthenticateUserUseCase
@@ -14,7 +15,7 @@ from src.domain.comment.use_cases.delete_comment import DeleteCommentUseCase
 from src.domain.user.use_cases.create_user import CreateUserUseCase
 from src.domain.user.use_cases.get_user import GetUserUseCase
 from src.domain.category.use_cases.create_category import CreateCategoryUseCase
-from src.domain.category.use_cases.get_all_categories import GetAllCategoriesUseCase
+from src.domain.category.use_cases.get_categories import GetCategoriesUseCase
 from src.domain.category.use_cases.get_category import GetCategoryUseCase
 from src.domain.category.use_cases.update_category import UpdateCategoryUseCase
 from src.domain.category.use_cases.delete_category import DeleteCategoryUseCase
@@ -42,6 +43,10 @@ def update_post_use_case() -> UpdatePostUseCase:
 
 def get_posts_by_category_use_case() -> GetPostsByCategoryUseCase:
     return GetPostsByCategoryUseCase()
+
+
+def get_posts_by_user_use_case() -> GetPostsByUserUseCase:
+    return GetPostsByUserUseCase()
 
 
 def update_post_image_use_case() -> UpdatePostImageUseCase:
@@ -84,8 +89,8 @@ def create_category_use_case() -> CreateCategoryUseCase:
     return CreateCategoryUseCase()
 
 
-def get_all_categories_use_case() -> GetAllCategoriesUseCase:
-    return GetAllCategoriesUseCase()
+def get_categories_use_case() -> GetCategoriesUseCase:
+    return GetCategoriesUseCase()
 
 
 def get_category_use_case() -> GetCategoryUseCase:

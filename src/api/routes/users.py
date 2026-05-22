@@ -1,11 +1,18 @@
 import uuid
+from fastapi import APIRouter, Depends, status, Query
 from typing import List
 
-from fastapi import APIRouter, Depends, status
-
+from src.core.config import settings
+from src.schemas.pagination import PaginatedResponse
+from src.schemas.posts import PostResponse
 from src.schemas.users import UserCreate, UserResponse, UserUpdate
-from src.api.dependencies import create_user_use_case, get_user_use_case
+from src.api.dependencies import (
+    create_user_use_case,
+    get_user_use_case,
+    get_posts_by_user_use_case,
+)
 from src.db.db import database
+from src.domain.post.use_cases.get_posts_by_user import GetPostsByUserUseCase
 from src.domain.user.use_cases.create_user import CreateUserUseCase
 from src.domain.user.use_cases.get_user import GetUserUseCase
 from src.db.models.users import User
@@ -31,7 +38,7 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.get("/", response_model=List[UserResponse], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=list[UserResponse], status_code=status.HTTP_200_OK)
 async def get_users(
     current_user: User = Depends(get_current_user),
 ) -> List[UserResponse]:
@@ -49,6 +56,22 @@ async def get_user(
 ):
     user = await use_case.execute(user_id=user_id)
     return user
+
+
+@router.get("/{user_id}/posts", response_model=PaginatedResponse[PostResponse])
+async def get_user_posts(
+    user_id: uuid.UUID,
+    page: int = 1,
+    size: int = Query(default=settings.PAGINATION_SIZE, ge=1, le=100),
+    use_case: GetPostsByUserUseCase = Depends(get_posts_by_user_use_case),
+):
+    posts, total = await use_case.execute(user_id=user_id, page=page, size=size)
+    return PaginatedResponse(
+        total=total,
+        page=page,
+        size=size,
+        results=[PostResponse.model_validate(p) for p in posts],
+    )
 
 
 @router.put("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)

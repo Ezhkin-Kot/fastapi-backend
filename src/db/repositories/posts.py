@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Sequence, Tuple
+from typing import Sequence, Tuple
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,14 +15,15 @@ class PostRepository(BaseRepository[Post]):
         super().__init__(Post, session)
 
     async def get(self, obj_id: uuid.UUID) -> Post | None:
-        query = select(Post).where(Post.id == obj_id).options(selectinload(Post.comments))
+        query = (
+            select(Post).where(Post.id == obj_id).options(selectinload(Post.comments))
+        )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def get_all_paginated(
         self, skip: int = 0, limit: int = 10
     ) -> Tuple[Sequence[Post], int]:
-        # Query for the paginated results
         query = (
             select(Post)
             .options(selectinload(Post.comments))
@@ -33,7 +34,6 @@ class PostRepository(BaseRepository[Post]):
         result = await self.session.execute(query)
         items = result.scalars().all()
 
-        # Query for the total count
         count_query = select(func.count(Post.id))
         total_count_result = await self.session.execute(count_query)
         total = total_count_result.scalar_one()
@@ -45,7 +45,6 @@ class PostRepository(BaseRepository[Post]):
     ) -> Tuple[Sequence[Post], int]:
         base_query = select(Post).join(Category).where(Category.slug == slug)
 
-        # Query for the paginated results
         query = (
             base_query.options(
                 joinedload(Post.author),
@@ -60,6 +59,30 @@ class PostRepository(BaseRepository[Post]):
         items = result.scalars().all()
 
         # Query for the total count
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total_count_result = await self.session.execute(count_query)
+        total = total_count_result.scalar_one()
+
+        return items, total
+
+    async def get_by_user_id_paginated(
+        self, user_id: uuid.UUID, skip: int = 0, limit: int = 10
+    ) -> Tuple[Sequence[Post], int]:
+        base_query = select(Post).where(Post.author_id == user_id)
+
+        query = (
+            base_query.options(
+                joinedload(Post.author),
+                joinedload(Post.category),
+                selectinload(Post.comments),
+            )
+            .order_by(Post.pub_date.desc())
+            .offset(skip)
+            .limit(limit)
+        )
+        result = await self.session.execute(query)
+        items = result.scalars().all()
+
         count_query = select(func.count()).select_from(base_query.subquery())
         total_count_result = await self.session.execute(count_query)
         total = total_count_result.scalar_one()

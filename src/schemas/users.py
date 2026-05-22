@@ -1,8 +1,6 @@
 import re
 import uuid
 from datetime import datetime
-from typing import List
-
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -11,8 +9,6 @@ from pydantic import (
     SecretStr,
     field_validator,
 )
-
-from src.schemas.posts import PostResponse
 
 
 class UserBase(BaseModel):
@@ -24,7 +20,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: SecretStr = Field(min_length=8, max_length=255)
-    is_superuser: bool = False
 
     @field_validator("password")
     def password_complexity(cls, v: SecretStr):
@@ -53,6 +48,5 @@ class UserResponse(UserBase):
     is_active: bool = True
     is_superuser: bool = False
     created_at: datetime | None = None
-    posts: List[PostResponse] = []
 
     model_config = ConfigDict(from_attributes=True)

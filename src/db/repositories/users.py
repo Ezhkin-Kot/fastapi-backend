@@ -1,6 +1,6 @@
 import uuid
 from typing import Sequence
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -16,7 +16,7 @@ class UserRepository(BaseRepository[User]):
         super().__init__(User, session)
 
     async def get_all(self) -> Sequence[User]:
-        query = select(self.model).options(selectinload(User.posts))
+        query = select(self.model)
         result = await self.session.execute(query)
         return result.scalars().all()
 
@@ -41,10 +41,6 @@ class UserRepository(BaseRepository[User]):
             raise UserAlreadyExistsError()
 
     async def get_by_username(self, username: str) -> User | None:
-        query = (
-            select(User)
-            .where(User.username == username)
-            .options(selectinload(User.posts))
-        )
+        query = select(User).where(User.username == username)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()

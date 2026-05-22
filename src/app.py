@@ -22,6 +22,7 @@ from src.api.routes.auth import router as auth_router
 from src.api.routes.comments import router as comments_router
 from src.api.routes.comments_actions import router as comments_actions_router
 from src.api.routes.categories import router as categories_router
+from src.api.routes.admin.admin import router as admin_router
 from src.core.config import settings
 from src.core.exceptions import (
     DatabaseError,
@@ -52,6 +53,9 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
     app.middleware("http")(logging_middleware)
+
+    # Add the API admin router BEFORE the UI admin panel to avoid conflicts
+    app.include_router(admin_router, prefix="/admin", tags=["Admin APIs"])
 
     authentication_backend = AdminAuthBackend(secret_key=settings.SECRET_KEY)
     admin = Admin(

@@ -1,3 +1,4 @@
+from src.core.exceptions import UserAlreadyExistsError
 from src.db.db import database
 from src.schemas.users import UserCreate
 from src.db.models.users import User
@@ -12,6 +13,15 @@ class CreateUserUseCase:
     async def execute(self, user_in: UserCreate) -> User:
         async with database.session() as session:
             repo = UserRepository(session)
+
+            existing_user = await repo.get_by_username(user_in.username)
+            if existing_user:
+                raise UserAlreadyExistsError()
+
+            existing_email = await repo.get_by_email(user_in.email)
+            if existing_email:
+                raise UserAlreadyExistsError()
+
             user_data = user_in.model_dump()
             password_plain = user_in.password.get_secret_value()
             user_data["hashed_password"] = get_password_hash(password_plain)

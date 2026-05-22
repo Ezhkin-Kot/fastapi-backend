@@ -4,6 +4,7 @@ from starlette import status
 from fastapi import Depends, HTTPException
 
 from src.core.config import settings
+from src.core.exceptions import ForbiddenError
 from src.db.db import database
 from src.db.models.users import User
 from src.db.repositories.users import UserRepository
@@ -44,3 +45,11 @@ async def get_current_user(
         if user is None:
             raise credentials_exception
         return user
+
+
+async def get_current_admin_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if not current_user.is_superuser:
+        raise ForbiddenError(message="Admin access required")
+    return current_user
