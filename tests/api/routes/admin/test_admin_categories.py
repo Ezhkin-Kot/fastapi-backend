@@ -12,10 +12,11 @@ async def test_category_crud(test_app: AsyncClient):
 
     # Create an admin user directly in the DB
     admin_data = await create_user_directly("cat_admin", is_superuser=True)
-    admin_token = await login_user(
+    admin_token_data = await login_user(
         test_app, admin_data["username"], admin_data["password"]
     )
-    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    admin_access_token = admin_token_data["access_token"]
+    headers_admin = {"Authorization": f"Bearer {admin_access_token}"}
 
     category_data = {
         "title": "Admin Test Category",

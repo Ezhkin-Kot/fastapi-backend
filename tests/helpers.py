@@ -41,17 +41,18 @@ async def create_user_directly(user_suffix: str, is_superuser: bool = False) -> 
     return user_data
 
 
-async def login_user(test_app: AsyncClient, username: str, password: str) -> str:
-    """Logs in a user and returns the access token."""
+async def login_user(
+    test_app: AsyncClient, username: str, password: str
+) -> dict[str, str]:
+    """Logs in a user and returns the token dictionary."""
     login_data = {"username": username, "password": password}
     token_response = await test_app.post("/api/v1/auth/token", data=login_data)
     assert token_response.status_code == 200, token_response.text
-    token = token_response.json()["access_token"]
-    return token
+    return token_response.json()
 
 
 async def create_user_and_login(test_app: AsyncClient, user_suffix: str):
-    """Creates a regular user via API, logs them in, and returns their token."""
+    """Creates a regular user via API, logs them in, and returns their access token and ID."""
     user_data = {
         "first_name": "Test",
         "last_name": "User",
@@ -62,8 +63,10 @@ async def create_user_and_login(test_app: AsyncClient, user_suffix: str):
     register_response = await test_app.post("/api/v1/users/register", json=user_data)
     assert register_response.status_code == 201, register_response.text
 
-    token = await login_user(test_app, user_data["username"], user_data["password"])
-    return token, register_response.json()["id"]
+    token_data = await login_user(
+        test_app, user_data["username"], user_data["password"]
+    )
+    return token_data["access_token"], register_response.json()["id"]
 
 
 async def create_category(test_app: AsyncClient, token: str, slug: str, title: str):

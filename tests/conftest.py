@@ -50,10 +50,23 @@ async def setup_db():
         await conn.run_sync(Base.metadata.drop_all)
 
 
+import fakeredis.aioredis
+
+from src.db.redis import get_redis_client
+
+
 @pytest.fixture(scope="function")
 async def test_app():
     app = create_app()
+    fake_redis_client = fakeredis.aioredis.FakeRedis()
+
+    async def override_get_redis():
+        yield fake_redis_client
+
+    app.dependency_overrides[get_redis_client] = override_get_redis
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as client:
         yield client
+
+    await fake_redis_client.aclose()

@@ -14,11 +14,12 @@ from tests.helpers import (
 async def test_get_and_list_categories(test_app: AsyncClient):
     # Setup: Create an admin and some categories
     admin_data = await create_user_directly("cat_list_admin", is_superuser=True)
-    admin_token = await login_user(
+    admin_token_data = await login_user(
         test_app, admin_data["username"], admin_data["password"]
     )
-    cat1 = await create_category(test_app, admin_token, "cat-1", "Category 1")
-    await create_category(test_app, admin_token, "cat-2", "Category 2")
+    admin_access_token = admin_token_data["access_token"]
+    cat1 = await create_category(test_app, admin_access_token, "cat-1", "Category 1")
+    await create_category(test_app, admin_access_token, "cat-2", "Category 2")
 
     # Test Get single category (public endpoint)
     response = await test_app.get(f"/api/v1/categories/{cat1['id']}")
@@ -40,13 +41,16 @@ async def test_get_and_list_categories(test_app: AsyncClient):
 async def test_get_posts_by_category(test_app: AsyncClient):
     # Setup: Create admin, regular user, categories, and posts
     admin_data = await create_user_directly("cat_posts_admin", is_superuser=True)
-    admin_token = await login_user(
+    admin_token_data = await login_user(
         test_app, admin_data["username"], admin_data["password"]
     )
+    admin_access_token = admin_token_data["access_token"]
     user_token, _ = await create_user_and_login(test_app, "cat_posts_user")
 
-    tech_cat = await create_category(test_app, admin_token, "tech", "Technology")
-    life_cat = await create_category(test_app, admin_token, "lifestyle", "Lifestyle")
+    tech_cat = await create_category(test_app, admin_access_token, "tech", "Technology")
+    life_cat = await create_category(
+        test_app, admin_access_token, "lifestyle", "Lifestyle"
+    )
 
     await create_post(
         test_app, user_token, "Post 1 in Tech", category_id=tech_cat["id"]
