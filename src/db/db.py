@@ -37,6 +37,11 @@ database = Database()
 metadata = MetaData(schema=settings.POSTGRES_SCHEMA)
 
 
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async with database.session() as session:
+        yield session
+
+
 class Base(DeclarativeBase):
     metadata = metadata
     type_annotation_map = {

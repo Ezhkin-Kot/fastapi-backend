@@ -1,3 +1,9 @@
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.db.db import get_session
+from src.db.repositories.refresh_token import RefreshTokenRepository
+from src.db.repositories.users import UserRepository
 from src.domain.post.use_cases.create_post import CreatePostUseCase
 from src.domain.post.use_cases.get_posts import GetPostsUseCase
 from src.domain.post.use_cases.get_post import GetPostUseCase
@@ -8,6 +14,8 @@ from src.domain.post.use_cases.get_posts_by_user import GetPostsByUserUseCase
 from src.domain.post.use_cases.update_post_image import UpdatePostImageUseCase
 from src.domain.auth.use_cases.create_access_token import CreateAccessTokenUseCase
 from src.domain.auth.use_cases.authenticate_user import AuthenticateUserUseCase
+from src.domain.auth.use_cases.refresh_token import RefreshTokenUseCase
+from src.domain.auth.use_cases.logout_user import LogoutUserUseCase
 from src.domain.comment.use_cases.create_comment import CreateCommentUseCase
 from src.domain.comment.use_cases.get_comments import GetCommentsUseCase
 from src.domain.comment.use_cases.update_comment import UpdateCommentUseCase
@@ -57,8 +65,36 @@ def create_access_token_use_case() -> CreateAccessTokenUseCase:
     return CreateAccessTokenUseCase()
 
 
-def authenticate_user_use_case() -> AuthenticateUserUseCase:
-    return AuthenticateUserUseCase()
+def authenticate_user_use_case(
+    session: AsyncSession = Depends(get_session),
+    create_access_token_use_case: CreateAccessTokenUseCase = Depends(
+        create_access_token_use_case
+    ),
+) -> AuthenticateUserUseCase:
+    return AuthenticateUserUseCase(
+        create_access_token_use_case=create_access_token_use_case,
+        session=session,
+    )
+
+
+def refresh_token_use_case(
+    session: AsyncSession = Depends(get_session),
+    create_access_token_use_case: CreateAccessTokenUseCase = Depends(
+        create_access_token_use_case
+    ),
+) -> RefreshTokenUseCase:
+    return RefreshTokenUseCase(
+        create_access_token_use_case=create_access_token_use_case,
+        refresh_token_repository=RefreshTokenRepository(session),
+        user_repository=UserRepository(session),
+        session=session,
+    )
+
+
+def logout_user_use_case(
+    session: AsyncSession = Depends(get_session),
+) -> LogoutUserUseCase:
+    return LogoutUserUseCase(refresh_token_repository=RefreshTokenRepository(session))
 
 
 def create_comment_use_case() -> CreateCommentUseCase:

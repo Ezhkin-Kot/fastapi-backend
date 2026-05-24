@@ -1,19 +1,36 @@
-from src.db.db import database
+import uuid
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.db.models.users import User
 from src.db.repositories.users import UserRepository
 from src.resources.auth import verify_password
+from src.services.auth import create_refresh_token, Token
+from src.domain.auth.use_cases.create_access_token import CreateAccessTokenUseCase
 
 
 class AuthenticateUserUseCase:
-    def __init__(self):
-        pass
+    def __init__(
+        self,
+        create_access_token_use_case: CreateAccessTokenUseCase,
+        session: AsyncSession,
+    ):
+        self.create_access_token_use_case = create_access_token_use_case
+        self.session = session
+        self.user_repository = UserRepository(session)
 
-    async def execute(self, username: str, password: str) -> User | None:
-        async with database.session() as session:
-            self.repository = UserRepository(session)
-            user = await self.repository.get_by_username(username)
-            if not user:
-                return None
-            if not verify_password(password, user.hashed_password):
-                return None
-            return user
+    async def execute(self, username: str, password: str) -> Token | None:
+        user = await self.user_repository.get_by_username(username)
+        if not user:
+            return None
+        if not verify_password(password, user.hashed_password):
+            return None
+
+        access_token = self.create_access_token_use_case.execute(
+            data={"sub": user.username}
+        )
+        refresh_token = await create_refresh_token(user.id, self.session)
+
+        return Token(
+            access_token=access_token, token_type="bearer", refresh_token=refresh_token
+        )
+

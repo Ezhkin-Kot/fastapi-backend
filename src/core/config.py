@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     IMAGE_UPLOAD_DIR: str = "static/images/posts"
     PAGINATION_SIZE: int = 10
 

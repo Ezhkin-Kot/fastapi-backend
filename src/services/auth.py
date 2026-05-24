@@ -2,22 +2,43 @@ from jose import JWTError, jwt
 from pydantic import BaseModel
 from starlette import status
 from fastapi import Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+import secrets
+from datetime import datetime, timedelta
+import uuid
 
 from src.core.config import settings
 from src.core.exceptions import ForbiddenError
 from src.db.db import database
 from src.db.models.users import User
 from src.db.repositories.users import UserRepository
+from src.db.repositories.refresh_token import RefreshTokenRepository
 from src.resources.auth import oauth2_scheme
 
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+    refresh_token: str
 
 
 class TokenData(BaseModel):
     username: str | None = None
+
+
+async def create_refresh_token(user_id: uuid.UUID, session: AsyncSession) -> str:
+    expires_delta = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    refresh_token_string = secrets.token_urlsafe(32)
+    refresh_token_repo = RefreshTokenRepository(session)
+    await refresh_token_repo.create(
+        {
+            "token": refresh_token_string,
+            "user_id": user_id,
+            "expires_at": datetime.utcnow() + expires_delta,
+        }
+    )
+    return refresh_token_string
 
 
 async def get_current_user(
