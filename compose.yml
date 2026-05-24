@@ -31,6 +31,24 @@ services:
       - path: .env
         required: false
 
+  redis:
+    image: redis:alpine
+    container_name: fastapi_redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    env_file:
+      - path: .env
+        required: false
+
   backend:
     image: application
     volumes:
@@ -47,8 +65,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     pull_policy: build
     entrypoint: sh -c "./src/start.sh"
 
 volumes:
   postgres_data:
+  redis_data:
