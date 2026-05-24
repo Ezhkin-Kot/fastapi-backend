@@ -2,7 +2,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.db import get_session
-from src.db.repositories.refresh_token import RefreshTokenRepository
+from src.db.redis import get_redis_client
 from src.db.repositories.users import UserRepository
 from src.domain.post.use_cases.create_post import CreatePostUseCase
 from src.domain.post.use_cases.get_posts import GetPostsUseCase
@@ -27,6 +27,7 @@ from src.domain.category.use_cases.get_categories import GetCategoriesUseCase
 from src.domain.category.use_cases.get_category import GetCategoryUseCase
 from src.domain.category.use_cases.update_category import UpdateCategoryUseCase
 from src.domain.category.use_cases.delete_category import DeleteCategoryUseCase
+from redis.asyncio import Redis
 
 
 def create_post_use_case() -> CreatePostUseCase:
@@ -67,6 +68,7 @@ def create_access_token_use_case() -> CreateAccessTokenUseCase:
 
 def authenticate_user_use_case(
     session: AsyncSession = Depends(get_session),
+    redis_client: Redis = Depends(get_redis_client),
     create_access_token_use_case: CreateAccessTokenUseCase = Depends(
         create_access_token_use_case
     ),
@@ -74,27 +76,30 @@ def authenticate_user_use_case(
     return AuthenticateUserUseCase(
         create_access_token_use_case=create_access_token_use_case,
         session=session,
+        redis_client=redis_client,
     )
 
 
 def refresh_token_use_case(
     session: AsyncSession = Depends(get_session),
+    redis_client: Redis = Depends(get_redis_client),
     create_access_token_use_case: CreateAccessTokenUseCase = Depends(
         create_access_token_use_case
     ),
 ) -> RefreshTokenUseCase:
     return RefreshTokenUseCase(
         create_access_token_use_case=create_access_token_use_case,
-        refresh_token_repository=RefreshTokenRepository(session),
         user_repository=UserRepository(session),
-        session=session,
+        redis_client=redis_client,
     )
 
 
 def logout_user_use_case(
-    session: AsyncSession = Depends(get_session),
+    redis_client: Redis = Depends(get_redis_client),
 ) -> LogoutUserUseCase:
-    return LogoutUserUseCase(refresh_token_repository=RefreshTokenRepository(session))
+    return LogoutUserUseCase(
+        redis_client=redis_client,
+    )
 
 
 def create_comment_use_case() -> CreateCommentUseCase:

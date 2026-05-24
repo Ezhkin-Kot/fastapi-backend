@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import uuid
 
 from jose import jwt
 
@@ -17,6 +18,6 @@ class CreateAccessTokenUseCase:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
             expire = datetime.now(timezone.utc) + timedelta(minutes=self.expire_minutes)
-        to_encode.update({"exp": expire})
+        to_encode.update({"exp": expire, "jti": str(uuid.uuid4())})
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return encoded_jwt

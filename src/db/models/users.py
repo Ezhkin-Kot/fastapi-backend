@@ -6,7 +6,6 @@ from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.db import Base
-from src.db.models.refresh_token import RefreshToken
 
 
 class User(Base):
@@ -24,4 +23,3 @@ class User(Base):
 
     posts: Mapped[List["Post"]] = relationship(back_populates="author")
     comments: Mapped[List["Comment"]] = relationship(back_populates="author")
-    refresh_tokens: Mapped[List["RefreshToken"]] = relationship(back_populates="user")

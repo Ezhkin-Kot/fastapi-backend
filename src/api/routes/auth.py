@@ -11,6 +11,7 @@ from src.domain.auth.use_cases.refresh_token import RefreshTokenUseCase
 from src.domain.auth.use_cases.logout_user import LogoutUserUseCase
 from src.services.auth import Token, get_current_user
 from src.db.models.users import User
+from src.resources.auth import oauth2_scheme
 
 router = APIRouter()
 
@@ -47,9 +48,9 @@ async def refresh_access_token(
 @router.post("/logout")
 async def logout_user(
     current_user: User = Depends(get_current_user),
+    token: str = Depends(oauth2_scheme),
     refresh_token: str | None = Header(default=None, alias="X-Refresh-Token"),
     logout_use_case: LogoutUserUseCase = Depends(logout_user_use_case),
 ):
-    await logout_use_case.execute(current_user.id, refresh_token)
+    await logout_use_case.execute(token, refresh_token)
     return {"message": "Logged out successfully"}
-

@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: int = 1301
 
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+
     POSTGRES_SCHEMA: str = "public"
 
     SECRET_KEY: str
