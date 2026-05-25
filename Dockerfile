@@ -5,8 +5,11 @@ ENV PYTHONPATH /app/src
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+
+COPY pyproject.toml .
+RUN pip install uv
+RUN uv pip install --system --no-cache .
 
 COPY ./migrations /app/migrations
 COPY ./src /app/src
